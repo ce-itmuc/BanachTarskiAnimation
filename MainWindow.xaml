@@ -1,0 +1,52 @@
+﻿<Window x:Class="BanachTarskiAnimation.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BanachTarskiAnimation"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header / Controls -->
+        <DockPanel Grid.Row="0" Margin="10">
+            <TextBlock FontSize="20" FontWeight="Bold"
+                       Text="Banach–Tarski (Tarski‑Schritt) – F₂ als reduzierter Wörterbaum" />
+        </DockPanel>
+
+
+        <!-- Drawing Surface -->
+        <local:WordTreeView x:Name="Tree" Grid.Row="1" Margin="0" />
+
+
+        <!-- HUD / Legend -->
+        <Border Grid.Row="2" Background="#0F000000" Padding="10">
+            <StackPanel>
+                <TextBlock TextWrapping="Wrap" FontSize="13">
+                    <Run Text="Tasten: " />
+                    <Run FontWeight="Bold" Text="Leertaste/←/→" /> <Run Text=": Szenen • " />
+                    <Run FontWeight="Bold" Text="+ / -" /> <Run Text=": Tiefe • " />
+                    <Run FontWeight="Bold" Text="R" /> <Run Text=": Auto‑Play an/aus • " />
+                    <Run FontWeight="Bold" Text="Esc" /> <Run Text=": Beenden" />
+                </TextBlock>
+                <TextBlock Margin="0,4,0,0" TextWrapping="Wrap">
+                    <Run FontWeight="Bold" Text="A" /> <Run Text=": erste Letter a/A; ε ∈ A. " />
+                    <Run FontWeight="Bold" Text="B" /> <Run Text=": erste Letter b/B. " />
+                    <Run FontWeight="Bold" Text="aA" /> <Run Text=": { reduce('a'·w) : w ∈ A }. " />
+                    <Run FontWeight="Bold" Text="bB" /> <Run Text=": { reduce('b'·w) : w ∈ B }." />
+                </TextBlock>
+                <TextBlock Margin="0,4,0,0" TextWrapping="Wrap">
+                    <Run Text="Die freie Gruppe F₂ auf a,b bildet einen 4‑regulären Baum (ohne Sofort‑Inversen). " />
+                    <Run
+                        Text="Die Zerlegung F₂ = A ∪ B und die Bilder aA, bB zeigen: aA ∪ bB = F₂ – der Tarski‑Schritt. " />
+                    <Run Text="Das überträgt sich via Rotationen auf S² (Hausdorff) und radial auf B³ (Banach–Tarski)." />
+                </TextBlock>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
