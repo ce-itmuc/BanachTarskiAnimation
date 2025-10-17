@@ -17,9 +17,12 @@ public class WordTreeView : Control
     private readonly Typeface _type = new("Segoe UI");
 
     private int _depth = 4;
+    private double NodeRadius => 10.0;
+    private double LevelHeight => 100.0;
 
     private Dictionary<string, Node> _nodes = new();
     private int _scene;
+    private bool _autoPlay;
 
     static WordTreeView()
     {
@@ -36,10 +39,12 @@ public class WordTreeView : Control
         SizeChanged += (_, _) => InvalidateVisual();
     }
 
-    private double NodeRadius => 10.0;
-    private double LevelHeight => 100.0;
-
-    public bool AutoPlay { get; private set; }
+    public bool AutoPlay
+    {
+        get => _autoPlay;
+        
+        private set => _autoPlay = value;
+    }
 
     public void NextScene()
     {
@@ -82,10 +87,17 @@ public class WordTreeView : Control
         dc.DrawRectangle(new SolidColorBrush(Color.FromArgb(8, 0, 0, 0)), null, legendBand);
 
         foreach (var n in _nodes.Values)
-        foreach (var c in n.Children)
-            dc.DrawLine(new Pen(new SolidColorBrush(_edgeColor), 1.2), n.Pos, c.Pos);
-
-        foreach (var n in _nodes.Values.OrderBy(v => v.Depth)) DrawNode(dc, n);
+        {
+            foreach (var c in n.Children)
+            {
+                dc.DrawLine(new Pen(new SolidColorBrush(_edgeColor), 1.2), n.Pos, c.Pos);
+            }
+        }
+        
+        foreach (var n in _nodes.Values.OrderBy(v => v.Depth))
+        {
+            DrawNode(dc, n);
+        }
 
         var sceneTitle = _scene switch
         {
@@ -96,7 +108,8 @@ public class WordTreeView : Control
             4 => "Szene 5: aA ∪ bB = F₂ (Ausschnitt)",
             _ => string.Empty
         };
-        var status = $"Tiefe: {_depth}   Szene: {_scene + 1}/5   Auto: {(AutoPlay ? "an" : "aus")}   —   {sceneTitle}";
+        
+        var status = $"Tiefe: {_depth} Szene: {_scene + 1}/5 Auto: {(AutoPlay ? "an" : "aus")} — {sceneTitle}";
         DrawBottomRight(dc, status, 12, Brushes.DimGray);
     }
 
@@ -108,7 +121,10 @@ public class WordTreeView : Control
 
         dc.DrawEllipse(fillBrush, strokePen, n.Pos, NodeRadius, NodeRadius);
 
-        if (n.Depth > 4) return;
+        if (n.Depth > 4)
+        {
+            return;
+        }
 
         var label = string.IsNullOrEmpty(n.Word) ? "ε" : n.Word;
         var ft = new FormattedText(label, CultureInfo.CurrentUICulture,
@@ -192,17 +208,20 @@ public class WordTreeView : Control
 
     private void LayoutNodes(Size size)
     {
-        if (_nodes.Count == 0) return;
+        if (_nodes.Count == 0)
+        {
+            return;
+        }
 
         var w = Math.Max(200, size.Width);
-        double top = 150;
+        const double top = 150;
 
-        var groups = _nodes.Values.GroupBy(n => n.Depth).OrderBy(g => g.Key);
-        foreach (var grp in groups)
+        foreach (var grp in _nodes.Values.GroupBy(n => n.Depth).OrderBy(g => g.Key))
         {
             var count = grp.Count();
             var y = top + grp.Key * LevelHeight;
             var i = 0;
+            
             foreach (var node in grp.OrderBy(n => n.OrderIndex))
             {
                 var x = (i + 1) * (w / (count + 1));
@@ -224,14 +243,24 @@ public class WordTreeView : Control
         while (q.Count > 0)
         {
             var cur = q.Dequeue();
-            if (cur.Depth >= depth) continue;
+            if (cur.Depth >= depth)
+            {
+                continue;
+            }
+            
             foreach (var c in new[] { 'a', 'A', 'b', 'B' })
             {
-                if (IsInversePair(cur.LastChar, c)) continue;
+                if (IsInversePair(cur.LastChar, c))
+                {
+                    continue;
+                }
 
                 var childWord = cur.Word + c;
                 var child = new Node(childWord, cur.Depth + 1, NextOrderIndex(cur.OrderIndex, c));
-                if (!nodes.TryAdd(childWord, child)) continue;
+                if (!nodes.TryAdd(childWord, child))
+                {
+                    continue;
+                }
 
                 cur.Children.Add(child);
                 q.Enqueue(child);
@@ -250,34 +279,38 @@ public class WordTreeView : Control
     private static int NextOrderIndex(int parentOrder, char edge)
     {
         var edgeRank = edge switch { 'a' => 0, 'A' => 1, 'b' => 2, 'B' => 3, _ => 0 };
+        
         return parentOrder * 4 + edgeRank + 1;
     }
 
     private static bool InA(string w)
     {
-        if (w.Length == 0) return true; // ε ∈ A
-        var c = w[0];
-        return c == 'a' || c == 'A';
+        if (w.Length == 0) 
+        {
+            return true;
+        }
+        
+        return w[0] == 'a' || w[0] == 'A';
     }
 
     private static bool InB(string w)
     {
-        if (w.Length == 0) return false;
-
-        var c = w[0];
-        return c == 'b' || c == 'B';
+        if (w.Length == 0)
+        {
+            return false;
+        }
+        
+        return w[0] == 'b' || w[0] == 'B';
     }
 
     private static bool In_aA(string w)
     {
-        var pre = Reduce("A" + w); // A = a^{-1}
-        return InA(pre);
+        return InA(Reduce("A" + w));
     }
 
     private static bool In_bB(string w)
     {
-        var pre = Reduce("B" + w); // B = b^{-1}
-        return InB(pre);
+        return InB(Reduce("B" + w));
     }
 
     private static string Reduce(string w)
@@ -286,11 +319,17 @@ public class WordTreeView : Control
 
         var len = 0;
         foreach (var c in w)
+        {
             if (len > 0 && IsInversePair(buffer[len - 1], c))
+            {
                 len--;
+            }
             else
+            {
                 buffer[len++] = c;
-
+            }
+        }
+        
         return new string(buffer[..len]);
     }
 
